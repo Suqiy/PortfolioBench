@@ -4,7 +4,7 @@ portfolio/main.py
 Simple portfolio construction script that combines:
   1. EmaAlpha indicators      (from alpha/SimpleEmaFactors.py)
   2. EmaCross entry/exit signals (from strategy/EmaCrossStrategy.py logic)
-  3. ONS (Online Newton Step) weights (from user_data/strategies/ONS.py logic)
+  3. ONS (Online Newton Step) weights (from portfolio/ONS.py logic)
   4. Naïve 1/N equal-weight allocation as the baseline
 
 Usage:
@@ -141,7 +141,7 @@ def build_ema_position_series(df: pd.DataFrame) -> pd.Series:
     return pd.Series(positions, index=df.index, name="ema_position")
 
 
-# ---------- 3b. ONS weights (mirrors user_data/strategies/ONS.py) -----------
+# ---------- 3b. ONS weights (mirrors portfolio/ONS.py) -----------
 
 def calculate_ons_weights(
     prices: pd.DataFrame,
