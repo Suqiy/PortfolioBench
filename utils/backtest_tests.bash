@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 1. Configuration
-STRATEGY="ONS_Portfolio" # Update this to the exact name of your strategy class
+STRATEGIES=("ONS_Portfolio" "UniversalPortfolio" "ConstantRebalancedPortfolio" "AntiCorrelationPortfolio") # Update this to the exact name of your strategy class
 OUTPUT_DIR="user_data/backtest_results"
 
 # Create the output directory if it doesn't already exist
@@ -21,6 +21,7 @@ run_backtest() {
     local category=$1
     local tf=$2
     local pairs=$3
+    local strategy=$4
     
     # if [[ "$category" != "index_only" ]]; then
     #     echo "Skipping $category for $tf as requested..."
@@ -47,7 +48,8 @@ run_backtest() {
     
     # Execute Freqtrade via Docker
     docker compose run --rm freqtrade backtesting \
-        --strategy "$STRATEGY" \
+        --strategy "$strategy" \
+        --strategy-path "./portfolio" \
         --timeframe "$tf" \
         --timerange "$timerange" \
         --pairs $pairs \
@@ -60,10 +62,12 @@ run_backtest() {
 
 # 5. Loop through categories and timeframes
 for tf in "${TIMEFRAMES[@]}"; do
-    run_backtest "crypto_only" "$tf" "$CRYPTO_PAIRS"
-    run_backtest "stock_only" "$tf" "$STOCK_PAIRS"
-    run_backtest "index_only" "$tf" "$INDEX_PAIRS"
-    run_backtest "mix_assets" "$tf" "$MIX_PAIRS"
+    for strategy in "${STRATEGIES[@]}"; do
+        run_backtest "crypto_only" "$tf" "$CRYPTO_PAIRS" "$strategy"
+        run_backtest "stock_only" "$tf" "$STOCK_PAIRS" "$strategy"
+        run_backtest "index_only" "$tf" "$INDEX_PAIRS" "$strategy"
+        run_backtest "mix_assets" "$tf" "$MIX_PAIRS" "$strategy"
+    done
 done
 
 echo "All backtests completed successfully! Check the $OUTPUT_DIR folder."
